@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Estatísticas Fornecedor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+    <header>
+        <span class="navbar">
+            <h2 class="logo">Bem-vindo, Fornecedor!</h2>
+            <nav class="navigation">
+                <div class="user-dropdown">
+                    <div id="user-dropdown-menu" class="user-dropdown-menu">
+                        <a href="/profilefornecedor">Página inicial</a>
+                        <a href="/profilefornecedor/sobre_nos_fornecedores">Sobre nós</a>
+                        <a href="/">Logout</a>
+                    </div>
+                    <button id="user-btn" class="btn_user">
+                        <span class="fa fa-user white-icon"></span>
+                    </button>
+                </div>
+            </nav>
+        </span>
+    </header>
+
+    <main>
+        <div class="container-fluid">
+            <div class="row flex-nowrap">
+                <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark" style="margin-top: 115px;">
+                    <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                        <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+                            <span class="fs-5 d-none d-sm-inline">Menu</span>
+                        </a>
+                        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+                            <li class="nav-item">
+                                <a href="/profilefornecedor" class="nav-link align-middle px-0">
+                                    <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#graph-stats-1" data-bs-toggle="collapse" class="nav-link px-0 align-middle" id="link-dashboard">
+                                    <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" data-bs-toggle="collapse" class="nav-link px-0 align-middle" id="link-products">
+                                    <i class="fs-4 bi-grid"></i> <span class="ms-1 d-none d-sm-inline">Produtos</span>
+                                </a>
+                                <ul class="collapse nav flex-column ms-1" id="submenu3" data-bs-parent="#menu">
+                                    <li class="w-100">
+                                        <a href="#graph-stats-1" class="nav-link px-0" id="link-top3">
+                                            <span class="d-none d-sm-inline">Mais/Menos Vendidos</span>
+                                        </a>
+                                        <a href="#graph-stats-1" class="nav-link px-0" id="link-vendas-por-produto">
+                                            <span class="d-none d-sm-inline">Vendas por produto</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>
+                                <a href="#" class="nav-link px-0 align-middle" id="link-fornecedores">
+                                    <i class="fs-4 bi-people"></i> <span class="ms-1 d-none d-sm-inline">Fornecedores</span>
+                                </a>
+                                <ul class="collapse nav flex-column ms-1" id="submenu4" data-bs-parent="#menu">
+                                    <li class="w-100">
+                                        <a href="#graph-stats-1" class="nav-link px-0" id="link-ranking">
+                                            <span class="d-none d-sm-inline">Ranking</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <hr>
+                    </div>
+                </div>
+                <div class="col py-3" style="margin-top: 115px;">
+                    <div class="stats" id="graph-stats-1"></div>
+                    <div class="stats" id="graph-stats-2"></div>
+                    <div class="stats" id="graph-stats-3"></div>
+                    <h3>Left Sidebar with Submenus</h3>
+                    <div class="lead">
+                        An example 2-level sidebar with collapsible menu items. The menu functions like an "accordion" where only a single menu is open at a time. While the sidebar itself is not toggle-able, it does responsively shrink in width on smaller screens.
+                    </div>
+                    <div class="list-unstyled"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(document).ready(function() {
+            $("#user-btn").click(function() {
+                $("#user-dropdown-menu").toggle();
+            });
+        });
+
+        $(document).ready(function() {
+            $("#link-products").click(function() {
+                $("#submenu3").toggle();
+            });
+        });
+
+        $(document).ready(function() {
+            $("#link-fornecedores").click(function() {
+                $("#submenu4").toggle();
+            });
+        });
+
+        $(document).ready(function() {
+            var $textDiv = $("div.stats").eq(2).next();
+            $textDiv.empty();
+            $textDiv.remove();
+        });
+
+        $(document).ready(function() {
+            $("#link-top3").click(function() {
+                $("#graph-stats-1").show();
+                $("#graph-stats-2").show();
+                $("#graph-stats-3").show();
+
+                if (typeof graphJSON !== "undefined" && graphJSON !== null) {
+                    Plotly.react('graph-stats-1', JSON.parse(graphJSON));
+                    Plotly.react('graph-stats-2', JSON.parse(graphJSON));
+                    Plotly.react('graph-stats-3', JSON.parse(graphJSON));
+                } else {
+                    $.ajax({
+                        url: "/profilefornecedor/top3_vendidos_fornecedor",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-1', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+
+                    $.ajax({
+                        url: "/profilefornecedor/menos_vendidos_fornecedor",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-2', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+
+                    $.ajax({
+                        url: "/profilefornecedor/quantidades_vendidas_fornecedor",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-3', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function() {
+            $("#link-dashboard").click(function() {
+                $("#graph-stats-1").show();
+                $("#graph-stats-2").show();
+                $("#graph-stats-3").show();
+
+                if (typeof graphJSON !== "undefined" && graphJSON !== null) {
+                    Plotly.react('graph-stats-1', JSON.parse(graphJSON));
+                    Plotly.react('graph-stats-2', JSON.parse(graphJSON));
+                    Plotly.react('graph-stats-3', JSON.parse(graphJSON));
+                } else {
+                    $.ajax({
+                        url: "/profilefornecedor/vendas_do_mes_atual",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-1', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+
+                    $.ajax({
+                        url: "/profilefornecedor/vendas_mes_anterior",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-2', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+
+                    $.ajax({
+                        url: "/profilefornecedor/vendas_anuais",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-3', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function() {
+            $("#link-vendas-por-produto").click(function() {
+                $("#graph-stats-1").show();
+
+                if (typeof graphJSON !== "undefined" && graphJSON !== null) {
+                    Plotly.react('graph-stats-1', JSON.parse(graphJSON));
+                } else {
+                    $.ajax({
+                        url: "/profilefornecedor/vendas_fornecedor",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-1', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            });
+        });
+
+        $(document).ready(function() {
+            $("#link-ranking").click(function() {
+                $("#graph-stats-1").show();
+
+                if (typeof graphJSON !== "undefined" && graphJSON !== null) {
+                    Plotly.react('graph-stats-1', JSON.parse(graphJSON));
+                } else {
+                    $.ajax({
+                        url: "/profilefornecedor/ranking_fornecedores",
+                        type: "GET",
+                        success: function(response) {
+                            var graphJSON = JSON.parse(response.graphJSON);
+                            Plotly.newPlot('graph-stats-1', graphJSON);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

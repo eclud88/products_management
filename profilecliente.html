@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <title>Profile Cliente</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css">
+    <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css'>
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<header>
+    <div class="navbar">
+        <h2 class="logo">Bem-vindo, Cliente!</h2>
+        <nav class="navigation">
+            <div class="user-dropdown">
+                <button id="user-btn" class="btn_user" style="margin:60%; margin-top:0px; margin-bottom:0px;">
+                    <span class="fa fa-user white-icon"></span>
+                </button>
+                <div id="user-dropdown-menu" class="user-dropdown-menu">
+                    <a href="/profilecliente/estatisticas_cliente">Estatísticas</a>
+                    <a href="/">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+<main>
+    <div class="conteudo">
+        <div class="cards">
+            <div class="card text-white bg-primary mb-3" style="max-width: 15rem;">
+                <div class="card-header">COMPRAS</div>
+                <div class="card-body">
+                    <h5 class="card-title">Valor Total</h5>
+                    <p class="card-text">€ <span id="valor-compras">{{ valor_compras }}</span></p>
+                </div>
+            </div>
+            <div class="card text-white bg-success mb-3" style="max-width: 15rem;">
+                <div class="card-header">Produto mais comprado</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ produto_mais_comprado_total[0] }}</h5>
+                    {% if produto_mais_comprado_total %}
+                    <p class="card-text">{{ produto_mais_comprado_total[1] }} unidades</p>
+                    {% else %}
+                    <p class="card-text">0 unidades</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card text-dark bg-warning mb-3" style="max-width: 15rem;">
+                <div class="card-header">Produto menos comprado</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ produto_menos_comprado_total[0] }}</h5>
+                    {% if produto_menos_comprado_total %}
+                    <p class="card-text">{{ produto_menos_comprado_total[1] }} unidades</p>
+                    {% else %}
+                    <p class="card-text">0 unidades</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                <div class="card-header">Produto em que gasto mais €</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ produto_mais_custo[0] }}</h5>
+                    {% if compras_cliente %}
+                    <p class="card-text">€ <span id="valor-produto-mais-custo">{{ produto_mais_custo[4] }}</span></p>
+                    {% else %}
+                    <p class="card-text">€ 0.00</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-8">
+            <h1>Produtos a Comprar</h1>
+            <div class="stock-conteudo">
+                {% for compra in stock_admin %}
+                <div class="card product-card">
+                    <img src="{{ compra[6] }}" class="card-img-top" alt="Imagem do Produto">
+                    <div class="card-body text-dark">
+                        <h5 class="card-header">{{ compra[0] }}</h5>
+                        <p class="card-text">Marca: {{ compra[1] }}</p>
+                        <p class="card-text">Preço: € {{ '%.2f'% compra[2] }}</p>
+                        <p class="card-text">Em stock: <span id="stock-{{ compra[3] }}" data-stock="{{ compra[3] }}">{{ compra[3] }}</span></p>
+                        <div class="quantity-container">
+                            <label class="quantity-label" for="quantity-{{ compra[0] }}">Quantidade a comprar:</label>
+                            <input class="quantity-input" type="number" id="quantity-{{ compra[0] }}" min="0" max="{{ compra[3] }}" value="0">
+                        </div>
+                        <div class="add-button">
+                            <button class="btn btn-primary" id="add-button-{{ compra[0] }}" onclick="addToCart('{{ compra[0] }}', '{{ compra[1] }}', '{{ compra[2] }}', '{{ compra[3] }}', '{{ compra[4] }}', '{{ compra[5] }}', '{{ compra[6] }}', '{{ compra[7] }}')">Adicionar <i class="fas fa-shopping-cart add-icon"></i></button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Carrinho de Compras -->
+        <div class="col-sm-4">
+            <h2>Carrinho de Compras</h2>
+                <div class="cart-container">
+                <table class="cart-table">
+                    <thead>
+                    <tr>
+                        <th class="col-2 text-left">Produto</th>
+                        <th class="col-2 text-left">Marca</th>
+                        <th class="col-2 text-center">Quantidade</th>
+                        <th class="col-2 text-right">Preço</th>
+                        <th class="col-2 text-right">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody id="cart-items">
+                    <!-- As linhas dos produtos serão inseridas dinamicamente pelo JavaScript -->
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-right">Total a pagar:</td>
+                        <td class="text-right" id="total-value">€ 0</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" class="text-right">
+                            <div class="button-container">
+                                <button class="btn btn-primary" id="btnComprar" onclick="comprar()">Comprar</button>
+                                <button class="btn btn-secondary" onclick="cancelar()">Cancelar</button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Histórico de Compras -->
+            <h1>Histórico de Compras</h1>
+            <div class="stock-conteudo">
+                <!-- Loop sobre as compras do cliente -->
+                {% for compra in compras_cliente %}
+                <div class="card historico-compra-item">
+                    <img src="{{ compra[6] }}" class="card-img-top" alt="Imagem do Produto">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ compra[0] }}</h5>
+                        <p class="card-text">Marca: {{ compra[1] }}</p>
+                        <p class="card-text">Quantidade: {{ compra[3] }}</p>
+                        <p class="card-text">Preço: {{ compra[2] }}</p>
+                        <p class="card-text">Total: {{ compra[4] }}</p>
+                        <p class="card-text"><small class="text-muted">Data da Compra: {{ compra[5] }}</small></p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+    <script>
+        $(document).ready(function() {
+  // Espera até que o documento esteja pronto antes de executar qualquer código jQuery
+  $("#user-btn").click(function() {
+    // Quando o botão com o id "user-btn" é clicado
+    $("#user-dropdown-menu").toggle();
+    // Alterna a exibição do menu dropdown com o id "user-dropdown-menu"
+  });
+});
+
+
+// Obter o elemento que contém o valor das compras
+var valorComprasElement = document.getElementById("valor-compras");
+
+// Obter o valor das compras do elemento
+var valorCompras = parseFloat(valorComprasElement.textContent);
+
+// Arredondar o valor para duas casas decimais
+var valorArredondado = valorCompras.toFixed(2);
+
+// Atualizar o conteúdo do elemento com o valor arredondado
+valorComprasElement.textContent = valorArredondado;
+
+
+
+function updateTotal() {
+  // Função para atualizar o total da compra
+  var cartItems = document.getElementById('cart-items');
+  var rows = cartItems.getElementsByTagName('tr');
+  var total = 0;
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var cells = row.getElementsByTagName('td');
+    var quantidade = parseInt(cells[2].textContent);
+    var price = parseFloat(cells[3].textContent.substring(2));
+
+    cells[4].textContent = "€ " + (price * quantidade);
+    total += price * quantidade;
+  }
+
+  var totalValue = document.getElementById('total-value');
+  totalValue.textContent = "€ " + total;
+
+}
+
+function addToCart(nome, marca, preco, quantidadeDisponivel, total, data_compra, url_imagem) {
+  // Função para adicionar um item ao carrinho de compras
+  var quantityInput = document.getElementById('quantity-' + nome);
+  console.log("Quantity Input", quantityInput);
+  var quantidade = parseInt(quantityInput.value);
+
+  if (quantidade > 0 && quantidade <= quantidadeDisponivel) {
+    var cartItems = document.getElementById('cart-items');
+    var row = cartItems.insertRow();
+
+    // Cria células para cada dado do item
+    var cell1 = row.insertCell(0);
+    cell1.textContent = nome;
+    cell1.classList.add('text-left');
+
+    var cell2 = row.insertCell(1);
+    cell2.textContent = marca;
+    cell2.classList.add('text-left');
+
+    var cell3 = row.insertCell(2);
+    cell3.textContent = quantidade;
+    cell3.classList.add('text-center');
+
+    var cell4 = row.insertCell(3);
+    cell4.textContent = "€ " + preco;
+    cell4.classList.add('text-right');
+
+    var total = preco * quantidade;
+    var cell5 = row.insertCell(4);
+    cell5.textContent = "€ " + total;
+    cell5.classList.add('text-right');
+
+    var cell6 = row.insertCell(5);
+  cell6.textContent = data_compra;
+  cell6.classList.add('hidden');
+
+  var cell7 = row.insertCell(6);
+  cell7.innerHTML = '<img src="' + url_imagem + '" style="display: none;" alt="Imagem do Produto">';
+    cell7.classList.add('hidden');
+
+
+    updateStock(nome, quantidadeDisponivel, quantityInput, data_compra, url_imagem);
+
+    quantityInput.value = 0;
+
+    updateTotal();
+
+  }
+}
+
+{% for compra in stock_admin %}
+function updateStock(nome, quantidadeDisponivel, quantityInput) {
+  // Função para atualizar o stock disponível para uma compra específica
+  quantityInput.max = quantidadeDisponivel;
+  quantidadeDisponivel -= parseInt(quantityInput.value);
+
+  quantityInput.value = 0;
+
+  var stockElement = document.getElementById('stock-{{ compra[3] }}');
+  stockElement.innerHTML = quantidadeDisponivel;
+
+  var addButton = document.getElementById('add-button-{{ compra[0] }}');
+  addButton.disabled = (quantidadeDisponivel === 0);
+}
+{% endfor %}
+
+function comprar() {
+  // Função para realizar a compra
+  var cartItems = document.getElementById('cart-items');
+  var rows = cartItems.getElementsByTagName('tr');
+
+  var produtos = obterDadosProdutos();
+
+  if (produtos.length === 0) {
+    alert('Adicione produtos ao carrinho antes de comprar.');
+    return;
+  }
+
+  // Adiciona as informações da compra ao histórico de compras
+  document.addEventListener("DOMContentLoaded", function() {
+  atualizarHistoricoCompras();
+  var historicoCompras = document.getElementById('historico-compras');
+
+  for (var i = rows.length - 1; i >= 0; i--) {
+    var row = rows[i];
+    var cells = row.getElementsByTagName('td');
+
+    var nome = cells[0].textContent;
+    var marca = cells[1].textContent;
+    var quantidade = parseFloat(cells[2].textContent);
+    var preco = parseFloat(cells[3].textContent.substring(2));
+    var total = parseFloat(cells[4].textContent.substring(2));
+
+    // Obtém a imagem do produto a partir do atributo de dados
+    var url_imagem = cells[6].querySelector('img').getAttribute('src');
+    console.log("URL IMAGEM:", url_imagem);
+
+
+    var dataAtual = new Date().toLocaleDateString();
+
+    // Criar o elemento de cartão para exibir no histórico de compras
+    var historicoCard = document.createElement('div');
+    historicoCard.classList.add('card');
+
+    var cardImg = document.createElement('img');
+    cardImg.classList.add('card-img-top');
+    cardImg.src = url_imagem;
+    cardImg.alt = "Imagem do Produto";
+    cardImg.style.display = 'none'; // Oculta a imagem
+    historicoCard.appendChild(cardImg);
+
+    var cardBody = document.createElement('div');
+    cardBody.classList.add('card-body');
+
+    var cardTitle = document.createElement('h5');
+    cardTitle.classList.add('card-title');
+    cardTitle.textContent = nome;
+    cardBody.appendChild(cardTitle);
+
+    var cardText = document.createElement('p');
+    cardText.classList.add('card-text');
+    cardText.textContent = `Marca: ${marca}, Quantidade: ${quantidade}, Preço: ${preco}, Total: ${total}`;
+    cardBody.appendChild(cardText);
+
+    var cardTimestamp = document.createElement('p');
+    cardTimestamp.classList.add('card-text');
+    cardTimestamp.innerHTML = `<small class="text-muted">Data: ${dataAtual}</small>`;
+    cardBody.appendChild(cardTimestamp);
+
+    historicoCard.appendChild(cardBody);
+
+    historicoCompras.appendChild(historicoCard);
+  }
+    cartItems.innerHTML = '';
+
+  updateTotal();
+
+  });
+
+
+
+  // Envia uma solicitação POST para a rota '/profilecliente/processar_compra'
+  $.ajax({
+    url: '/profilecliente/processar_compra',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      produtos: produtos
+    }),
+    success: function(response) {
+
+      // Exibe uma mensagem de sucesso (opcional)
+      alert('Compra realizada com sucesso!');
+      window.location.reload();
+    },
+    error: function(error) {
+      // Exibe uma mensagem de erro (opcional)
+      alert('Erro ao processar a compra. Por favor, tente novamente.');
+    }
+  });
+}
+
+function obterDadosProdutos() {
+  // Função para obter os dados dos produtos presentes no carrinho de compras
+  var produtos = [];
+
+  var cartItems = document.getElementById('cart-items');
+  var rows = cartItems.getElementsByTagName('tr');
+
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var cells = row.getElementsByTagName('td');
+
+    var nome = cells[0].textContent;
+    var marca = cells[1].textContent;
+    var quantidade = parseFloat(cells[2].textContent);
+    var preco = parseFloat(cells[3].textContent.substring(2));
+    var total = parseFloat(cells[4].textContent.substring(2));
+    var url_imagem = cells[6].querySelector('img').getAttribute('src');
+
+    var produtoData = {
+      nome: nome,
+      marca: marca,
+      preco: preco,
+      quantidade: quantidade,
+      total: total,
+      url_imagem
+    };
+
+    produtos.push(produtoData);
+  }
+
+  return produtos;
+}
+
+function cancelar() {
+  // Função para cancelar a compra
+  var cartItems = document.getElementById('cart-items');
+  var rows = cartItems.getElementsByTagName('tr');
+
+  for (var i = rows.length - 1; i >= 0; i--) {
+    var row = rows[i];
+    var cells = row.getElementsByTagName('td');
+
+    var quantidadeInput = cells[2].querySelector('.quantity-input');
+    var quantidadeDisponivel = parseFloat(quantidadeInput?.getAttribute('max')) || 0;
+
+    var nome = cells[0].textContent;
+    var quantidade = parseFloat(cells[2].textContent);
+
+    if (quantidadeInput) {
+      updateStock(nome, quantidadeDisponivel + quantidade, quantidadeInput);
+    }
+
+    cartItems.deleteRow(i);
+    window.location.reload();
+  }
+
+  updateTotal();
+}
+
+function getCurrentDate() {
+  // Função para obter a data atual
+  var now = new Date();
+  var day = now.getDate();
+  var month = now.getMonth() + 1;
+  var year = now.getFullYear();
+
+  return day + '/' + month + '/' + year;
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  // Espera até que o documento esteja pronto antes de executar o código JavaScript a seguir
+
+  var incrementButtons = document.querySelectorAll(".increment-button");
+  var decrementButtons = document.querySelectorAll(".decrement-button");
+
+  incrementButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+      // Quando o botão de incremento é clicado
+      var quantityInput = this.previousElementSibling;
+      var quantidade = parseInt(quantityInput.value);
+      var maxQuantidade = parseInt(quantityInput.getAttribute("max"));
+
+      if (quantidade < maxQuantidade) {
+        quantidade++;
+        quantityInput.value = quantidade;
+        updateStock(quantityInput.id, maxQuantidade, quantityInput);
+      }
+    });
+  });
+
+  decrementButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+      // Quando o botão de decremento é clicado
+      var quantityInput = this.nextElementSibling;
+      var quantidade = parseInt(quantityInput.value);
+
+      if (quantidade > 0) {
+        quantidade--;
+        quantityInput.value = quantidade;
+        updateStock(quantityInput.id, maxQuantidade, quantityInput);
+      }
+    });
+  });
+});
+
+
+</script>
+</main>
+</body>
+</html>

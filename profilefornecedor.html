@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <title>Profile Fornecedor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<header>
+    <div class="navbar">
+        <h2 class="logo">Bem-vindo, Fornecedor!</h2>
+        <div id="notificacoes">
+            <span class="icone-notificacao">
+                <i class="fas fa-bell" id="icone-notificacao"></i>
+                <span class="numero-notificacoes">0</span>
+            </span>
+            <div id="notificacoes-dropdown" style="display: none;"></div>
+        </div>
+        <div class="navigation">
+            <div class="user-dropdown">
+                <button id="user-btn" class="btn_user">
+                    <span class="fa fa-user white-icon"></span>
+                </button>
+                <div id="user-dropdown-menu" class="user-dropdown-menu">
+                    <a href="/profilefornecedor/estatisticas_fornecedor">Estatísticas</a>
+                    <a href="/profilefornecedor/sobre_nos_fornecedores">Sobre nós</a>
+                    <a href="/">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<main>
+    <div class="conteudo">
+        <div class="cards">
+            <div class="card text-white bg-primary mb-3" style="max-width: 15rem;">
+                <div class="card-header">VENDAS</div>
+                <div class="card-body">
+                    {% if valor_vendas_por_fornecedor %}
+                    <div>
+                        {% for fornecedor, valor_vendas in valor_vendas_por_fornecedor %}
+                        <p>{{ fornecedor }}: €{{ valor_vendas }}</p>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p>€ 0.00</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card text-white bg-success mb-3" style="max-width: 15rem;">
+                <div class="card-header">Produto mais vendido</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ produto_mais_vendido[0] }}</h5>
+                    {% if produto_mais_vendido %}
+                    <p class="card-text">{{ produto_mais_vendido[1] }} unidades</p>
+                    {% else %}
+                    <p class="card-text">0 unidades</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card text-dark bg-warning mb-3" style="max-width: 15rem;">
+                <div class="card-header">Produto menos vendido</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ produto_menos_vendido[0] }}</h5>
+                    {% if produto_menos_vendido %}
+                    <p class="card-text">{{ produto_menos_vendido[1] }} unidades</p>
+                    {% else %}
+                    <p class="card-text">0 unidades</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card text-dark bg-info mb-3" style="max-width: 15rem;">
+                <div class="card-header">Produto que gera + vendas</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ produto_mais_vendas[0] }}</h5>
+                    {% if produto_mais_vendas %}
+                    <p class="card-text">€ {{ produto_mais_vendas[1] }}</p>
+                    {% else %}
+                    <p class="card-text">€ 0.00</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="table-container">
+            <div class="title-container">
+                <h1>Gestão de Produtos</h1>
+            </div>
+
+            {% for fornecedor, produtos_do_fornecedor in produtos_por_fornecedor.items() %}
+            <h2><span class="fornecedor"></span> {{ fornecedor }}</h2>
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Marca</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th>
+                    <th>Fornecedor</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for produto in produtos_do_fornecedor %}
+                <tr>
+                    <td>{{ produto.id }}</td>
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.marca }}</td>
+                    <td>{{ produto.preco }}</td>
+                    <td>{{ produto.quantidade }}</td>
+                    <td>{{ produto.fornecedor }}</td>
+                    <td>
+                        <button class="btn-action btn-edit" data-id="{{ produto.id }}">Editar</button>
+                        <button class="btn-action btn-delete" data-id="{{ produto.id }}">Excluir</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Produto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário de Edição -->
+                    <form id="editForm">
+                        <div class="form-group">
+                            <label for="editPreco">Preço</label>
+                            <input type="number" class="form-control" id="editPreco" min="1" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="editQuantidade">Quantidade</label>
+                            <input type="number" class="form-control" id="editQuantidade" min="1">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Exclusão -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Excluir Produto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir este produto?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btn-confirm-delete">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+<script>
+    $(document).ready(function () {
+        $("#user-btn").click(function () {
+            $("#user-dropdown-menu").toggle();
+        });
+    });
+
+    $(document).ready(function () {
+        var produtosPorFornecedor = {{ produtos_por_fornecedor | tojson | safe }};
+
+        // Excluir Produto
+        $(document).on('click', '.btn-delete', function () {
+            var productId = $(this).data('id');
+            var fornecedor = $(this).closest('tr').find('td:nth-child(6)').text();
+            var produtosDoFornecedor = produtosPorFornecedor[fornecedor];
+
+            if (produtosDoFornecedor) {
+                var productIndex = produtosDoFornecedor.findIndex(function (item) {
+                    return item.id === productId;
+                });
+
+                if (productIndex > -1) {
+                    $('#deleteModal').modal('show');
+
+                    // Confirmar exclusão do produto
+                    $('#btn-confirm-delete').off('click').on('click', function () {
+                        produtosDoFornecedor.splice(productIndex, 1);
+                        updateTable(fornecedor);
+                        $('#deleteModal').modal('hide');
+
+                        // Exclui o produto da base de dados
+                        excluir_produto(productId);
+                    });
+                }
+            }
+        });
+
+        // Editar Produto
+        $(document).on('click', '.btn-edit', function () {
+            var productId = $(this).data('id');
+            var fornecedor = $(this).closest('tr').find('td:nth-child(6)').text();
+            var produtosDoFornecedor = produtosPorFornecedor[fornecedor];
+
+            if (produtosDoFornecedor) {
+                var productIndex = produtosDoFornecedor.findIndex(function (item) {
+                    return item.id === productId;
+                });
+
+                if (productIndex > -1) {
+                    var product = produtosDoFornecedor[productIndex];
+                    $('#editModal').modal('show');
+                    $('#editNome').val(product.nome);
+                    $('#editMarca').val(product.marca);
+                    $('#editPreco').val(product.preco);
+                    $('#editQuantidade').val(product.quantidade);
+                    $('#editFornecedor').val(product.fornecedor);
+
+                    // Lidar com o envio do formulário de edição
+                    $('#editForm').off('submit').on('submit', function (e) {
+                        e.preventDefault();
+                        product.nome = $('#editNome').val();
+                        product.marca = $('#editMarca').val();
+                        product.preco = $('#editPreco').val();
+                        product.quantidade = $('#editQuantidade').val();
+                        product.fornecedor = $('#editFornecedor').val();
+                        $('#editModal').modal('hide');
+                        updateTable(fornecedor);
+
+                        // Atualiza o produto na base de dados
+                        atualizarProduto(productId, product.quantidade, product.preco);
+                    });
+                }
+            }
+        });
+
+        // Função para atualizar a tabela de um fornecedor específico
+        function updateTable(fornecedor) {
+            var tbody = '';
+            var produtosDoFornecedor = produtosPorFornecedor[fornecedor];
+
+            for (var i = 0; i < produtosDoFornecedor.length; i++) {
+                var produto = produtosDoFornecedor[i];
+                tbody += '<tr>';
+                tbody += '<td>' + produto.id + '</td>';
+                tbody += '<td>' + produto.nome + '</td>';
+                tbody += '<td>' + produto.marca + '</td>';
+                tbody += '<td>' + produto.preco + '</td>';
+                tbody += '<td>' + produto.quantidade + '</td>';
+                tbody += '<td class="fornecedor">' + produto.fornecedor + '</td>';
+                tbody += '<td>';
+                tbody += '<button class="btn-action btn-edit" data-id="' + produto.id + '">Editar</button>';
+                tbody += '<button class="btn-action btn-delete" data-id="' + produto.id + '">Excluir</button>';
+                tbody += '</td>';
+                tbody += '</tr>';
+            }
+
+            $('#' + fornecedor.replace(/ /g, '') + ' tbody').html(tbody);
+        }
+
+        // Iterar pelos fornecedores e atualizar as tabelas
+        for (var fornecedor in produtosPorFornecedor) {
+            if (produtosPorFornecedor.hasOwnProperty(fornecedor)) {
+                updateTable(fornecedor);
+            }
+        }
+    });
+
+    // Função para atualizar o produto no banco de dados
+    function atualizarProduto(productId, newQuantity, newPrice) {
+        $.ajax({
+            url: '/profilefornecedor/atualizar_produto',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                productId: productId,
+                newQuantity: newQuantity,
+                newPrice: newPrice
+            }),
+            success: function (response) {
+                alert(response.message);
+                window.location.reload();
+            },
+            error: function (error) {
+                alert('Erro ao atualizar o produto!');
+            }
+        });
+    }
+
+    // Função para excluir o produto da base de dados
+    function excluir_produto(productId) {
+        $.ajax({
+            url: '/profilefornecedor/excluir_produto',
+            method: 'POST',
+            data: {
+                productId: productId
+            },
+            success: function (response) {
+                // Exibição de mensagem de sucesso ou redirecionamento após exclusão do produto
+                alert('Produto excluído com sucesso!');
+                window.location.reload(); // Recarrega a página após exclusão
+
+                // Atualiza a tabela inicial
+                updateTable();
+            },
+            error: function (error) {
+                // Lida com erros de exclusão do produto
+                alert('Erro ao excluir o produto!');
+            }
+        });
+    }
+
+    // Função para atualizar o produto no banco de dados
+    function atualizarProduto(productId, newQuantity, newPrice) {
+        $.ajax({
+            url: '/profilefornecedor/atualizar_produto',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                productId: productId,
+                newQuantity: newQuantity,
+                newPrice: newPrice
+            }),
+            success: function (response) {
+                alert(response.message);
+                window.location.reload();
+            },
+            error: function (error) {
+                alert('Erro ao atualizar o produto!');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        // Atualizar o número de notificações
+        atualizarNumeroNotificacoes();
+
+        // Evento de clique no ícone de notificação
+        $('#icone-notificacao').on('click', function () {
+            exibirNotificacoes();
+        });
+    });
+
+    function atualizarNumeroNotificacoes() {
+        $.ajax({
+            url: '/profilefornecedor/notificacoes_fornecedor',
+            type: 'GET',
+            success: function (response) {
+                var numeroNotificacoes = response.notificacoes.length;
+                $('.numero-notificacoes').text(numeroNotificacoes);
+            },
+            error: function () {
+                console.error('Erro ao obter o número de notificações!');
+            }
+        });
+    }
+
+    function exibirNotificacoes() {
+        $.ajax({
+            url: '/profilefornecedor/notificacoes_fornecedor',
+            type: 'GET',
+            success: function (response) {
+                var notificacoes = response.notificacoes;
+                var dropdown = $('#notificacoes-dropdown');
+                dropdown.empty();
+
+                if (notificacoes.length === 0) {
+                    dropdown.append('<p>Sem notificações</p>');
+                } else {
+                    for (var i = 0; i < notificacoes.length; i++) {
+                        var notificacao = notificacoes[i];
+                        var produto = notificacao.produto;
+                        var quantidade = notificacao.quantidade;
+                        var fornecedor = notificacao.fornecedor;
+
+                        var mensagem = '<p><strong>Fornecedor:</strong> ' + fornecedor + '</p>';
+                        mensagem += '<p><strong>Produto:</strong> ' + produto + '</p>';
+                        mensagem += '<p><strong>Quantidade em stock:</strong> ' + quantidade + '</p>';
+                        mensagem += '<p>--------------------------------------------</p>';
+
+                        dropdown.append(mensagem);
+                    }
+                }
+
+                dropdown.slideToggle();
+
+                // Atualizar número no ícone de notificação
+                var numeroNotificacoes = notificacoes.length;
+                $('.numero-notificacoes').text(numeroNotificacoes);
+
+            },
+            error: function () {
+                console.error('Erro ao obter as notificações!');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        exibirNotificacoes();
+    });
+
+</script>
+</body>
+</html>

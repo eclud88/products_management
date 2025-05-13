@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sobre nos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <span class="navbar"></span>
+        <nav class="navigation">
+            <div class="user-dropdown">
+                <button id="user-btn" class="btn_user">
+                    <span class="fa fa-user white-icon"></span>
+                </button>
+                <div id="user-dropdown-menu" class="user-dropdown-menu">
+                    <a href="/profilefornecedor/estatisticas_fornecedor">Estatísticas</a>
+                    <a href="/profilefornecedor">Página inicial</a>
+                    <a href="/">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="conteudo">
+            <div class="card text-dark bg-light mb-3">
+                <div class="card-image">
+                    <img src="https://img.freepik.com/vetores-gratis/ilustracao-colorida-gradiente-de-design-de-logotipo-de-carta_483537-950.jpg" alt="Logotipo Fornecedor Z" width="100" height="100">
+                </div>
+                <div class="card-header">Fornecedor Z, Lda.</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title">Avenida da morada n.º 1</h5>
+                    <h5 class="card-title">2610-181 Lisboa</h5>
+                    <h5 class="card-title">Telefone: 212121212</h5>
+                    <h5 class="card-title">Email: fornecedor_z@fornecedorz.pt</h5>
+                    <h5 class="card-title">NIPC: 121212121</h5>
+                    <h5 class="card-title">Capital Social: €60.000</h5>
+                    <h5 class="card-title">IBAN: PT50 121212121212121212121</h5>
+                </div>
+            </div>
+
+            <div class="card text-dark bg-light mb-3">
+                <div class="card-image">
+                    <img src="https://img.freepik.com/fotos-premium/letra-f-em-uma-ia-generativa-de-relevo-de-monograma-dourado_190619-5961.jpg" alt="Logotipo Fornecedor F" width="100" height="100">
+                </div>
+                <div class="card-header">Fornecedor F Unipessoal</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title">Travessa do endereço n.º 101</h5>
+                    <h5 class="card-title">4715-563 Braga</h5>
+                    <h5 class="card-title">Telemóvel: 949494949</h5>
+                    <h5 class="card-title">Email: fornecedor.f@fornecedorf.pt</h5>
+                    <h5 class="card-title">NIPC: 144114411</h5>
+                    <h5 class="card-title">Capital Social: €20.000</h5>
+                    <h5 class="card-title">IBAN: PT50 123123123123123123123</h5>
+                </div>
+            </div>
+
+            <div class="card text-dark bg-light mb-3">
+                <div class="card-image">
+                    <img src="https://img.freepik.com/fotos-gratis/letra-x-realista-com-superficie-brilhante_23-2150458447.jpg" alt="Logotipo Fornecedor X" width="100" height="100">
+                </div>
+                <div class="card-header">Fornecedor X, Lda.</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title">Rua sem nome n.º 1001</h5>
+                    <h5 class="card-title">4410-493 Porto</h5>
+                    <h5 class="card-title">Telefone: 222222222</h5>
+                    <h5 class="card-title">Email: fornecedor-x@fornecedorx.pt</h5>
+                    <h5 class="card-title">NIPC: 109109109</h5>
+                    <h5 class="card-title">Capital Social: €35.000</h5>
+                    <h5 class="card-title">IBAN: PT50 190190190190190190190</h5>
+                </div>
+            </div>
+
+            <div class="card text-dark bg-light mb-3">
+                <div class="card-image">
+                    <img src="https://img.freepik.com/vetores-premium/letra-dourada-um-simbolo-em-um-icone-de-fundo-preto-4_95164-5533.jpg" alt="Logotipo Fornecedor A" width="100" height="100">
+                </div>
+                <div class="card-header">Fornecedor A, Lda.</div>
+                <div class="card-body text-primary">
+                    <h5 class="card-title">Rua do Sucesso n.º 999</h5>
+                    <h5 class="card-title">3000-001 Coimbra</h5>
+                    <h5 class="card-title">Telefone: 239239239</h5>
+                    <h5 class="card-title">Email: fornecedor--a@fornecedora.pt</h5>
+                    <h5 class="card-title">NIPC: 123912391</h5>
+                    <h5 class="card-title">Capital Social: €15.000</h5>
+                    <h5 class="card-title">IBAN: PT50 123912391239123912391</h5>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        $(document).ready(function() {
+            $("#user-btn").click(function() {
+                $("#user-dropdown-menu").toggle();
+            });
+        });
+    </script>
+</body>
+</html>

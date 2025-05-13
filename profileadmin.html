@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Profile Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<header>
+    <span class="navbar">
+        <h2 class="logo">Bem-vindo, Administrador!</h2>
+        <div id="notificacoes">
+            <span class="icone-notificacao">
+                <i class="fas fa-bell" id="icone-notificacao"></i>
+                <span class="numero-notificacoes">0</span>
+            </span>
+            <div id="notificacoes-dropdown" style="display: none;"></div>
+        </div>
+        <nav class="navigation">
+            <div class="user-dropdown">
+                <button id="user-btn" class="btn_user">
+                    <span class="fa fa-user white-icon"></span>
+                </button>
+                <div id="user-dropdown-menu" class="user-dropdown-menu">
+                    <a href="/profileadmin/estatisticas_admin">Estatísticas</a>
+                    <a href="/profilefornecedor" target="_blank">Perfil Fornecedor</a>
+                    <a href="/profilecliente" target="_blank">Perfil Cliente</a>
+                    <a href="/">Logout</a>
+                </div>
+            </div>
+        </nav>
+    </span>
+</header>
+<main>
+    <div class="conteudo">
+        <div class="cards">
+            <div class="card text-white bg-primary mb-3" style="max-width: 15rem;">
+                <div class="card-header">VENDAS</div>
+                <div class="card-body">
+                    <h5 class="card-title">Valor total</h5>
+                    <p class="card-text" id="valorVendas">€ {{ total_vendas }}</p>
+                </div>
+            </div>
+            <div class="card text-white bg-danger mb-3" style="max-width: 18rem;">
+                <div class="card-header">COMPRAS</div>
+                <div class="card-body">
+                    <h5 class="card-title">Valor Total</h5>
+                    <p class="card-text">€ {{ total_compras }}</p>
+                </div>
+            </div>
+            <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
+                <div class="card-header">Lucro</div>
+                <div class="card-body">
+                    <h5 class="card-title">Valor total</h5>
+                    <p class="card-text">€ {{ valor_lucro }}</p>
+                </div>
+            </div>
+            <div class="card text-dark bg-warning mb-3" style="max-width: 15rem;">
+                <div class="card-header">STOCK</div>
+                <div class="card-body">
+                    <h5 class="card-title">Quantidade total</h5>
+                    <p class="card-text">{{ total_quantidades }} unidades</p>
+                </div>
+            </div>
+        </div>
+        <h1>Produtos dos Fornecedores</h1>
+        <div class="products-container">
+            {% for produto in produtos %}
+            <div class="card product-card">
+                <img src="{{ produto[6] }}" class="card-img-top" alt="Imagem do Produto">
+                <div class="card-body text-dark">
+                    <h5 class="card-title">{{ produto[1] }}</h5>
+                    <p class="card-text">ID: {{ produto[0] }}</p>
+                    <p class="card-text">Marca: {{ produto[2] }}</p>
+                    <p class="card-text">Preço: {{ produto[3] }}</p>
+                    <p class="card-text">Quantidade Disponível: {{ produto[4] }}</p>
+                    <p class="card-text">Fornecedor: {{ produto[5] }}</p>
+                    <input type="number" min="0" max="{{ produto[4] }}" name="quantidade" id="quantidade_{{ produto[0] }}" required>
+                    <button class="btn btn-primary btn-comprar" id="btn-comprar" data-id="{{ produto[0] }}" data-url-imagem="{{ produto[6] }}">Comprar</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <h1>Produtos em Stock</h1>
+        <div class="stock-container">
+            {% for produto in stock_admin %}
+            <div class="card product-card">
+                <img src="{{ produto[7] }}" class="card-img-top" alt="Imagem do Produto">
+                <div class="card-body text-dark">
+                    <h5 class="card-title">{{ produto[1] }}</h5>
+                    <p class="card-text">ID: {{ produto[0] }}</p>
+                    <p class="card-text">Marca: {{ produto[2] }}</p>
+                    <p class="card-text">Preço: {{ produto[3] }}</p>
+                    <p class="card-text">Quantidade: {{ produto[4] }}</p>
+                    <p class="card-text">Fornecedor: {{ produto[5] }}</p>
+                    <p class="card-text">Data de Compra: {{ produto[6] }}</p>
+                    <button class="btn btn-danger btn-excluir" id="btn-excluir" data-nome="{{ produto[1] }}" data-quantidade="{{ produto[4] }}" data-productId="{{ produto[0] }}">Excluir</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmacaoModal" tabindex="-1" aria-labelledby="confirmacaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmacaoModalLabel">Confirmação de Compra</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que quer comprar <span id="quantidadeInput"></span> unidades do produto "<span id="produtoNome"></span>" da marca "<span id="produtoMarca"></span>" do fornecedor "<span id="produtoFornecedor"></span>"?</p>
+                    <input type="hidden" id="produtoUrlImagem">
+                    <p>Preço unitário: <span id="produtoPreco"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmarCompra()">Sim</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Elemento de entrada oculto -->
+    <input type="hidden" id="produtoIdInput">
+</main>
+<script>
+    $(document).ready(function () {
+        $("#user-btn").click(function () {
+            $("#user-dropdown-menu").toggle();
+        });
+    });
+
+    $(document).ready(function () {
+        $('.btn-excluir').click(function () {
+            // Obtenha o Id dos produtos a partir dos atributos de dados
+            var btnExcluir = $(this);
+            var productId = btnExcluir.data("productid");
+
+            // Verifique se a quantidade é igual a zero
+            var quantidade = parseInt($(this).data("quantidade"));
+            if (quantidade === 0) {
+                // Confirme se o utilizador deseja excluir o produto
+                if (confirm("Tem certeza de que deseja excluir o produto?")) {
+                    // Enviar a solicitação de exclusão ao servidor
+                    $.ajax({
+                        url: "/profileadmin/excluir_produto",
+                        type: "POST",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify({productId: productId}),
+                        success: function (response) {
+                            // Exibição da mensagem de sucesso
+                            alert(response.message);
+                            // Remova o produto do contêiner na página
+                            btnExcluir.closest('.product-card').remove();
+                        },
+                        error: function (xhr, status, error) {
+                            // Exibição de uma mensagem de erro
+                            alert("Ocorreu um erro ao excluir o produto: " + error);
+                        }
+                    });
+                }
+            } else {
+                // Exibição de uma mensagem informando que a exclusão não é possível
+                alert("A exclusão não é possível porque a quantidade não é zero.");
+            }
+        });
+    });
+
+    const quantidadeInputList = document.querySelectorAll('input[name="quantidade"]');
+    quantidadeInputList.forEach((input) => {
+        const btnComprar = input.closest('.product-card').querySelector('.btn-comprar');
+
+        if (btnComprar) {
+            btnComprar.addEventListener('click', () => {
+                const produtoId = btnComprar.getAttribute('data-id');
+                const nome = btnComprar.parentNode.querySelector('.card-title').textContent;
+                const marcaText = btnComprar.parentNode.querySelector('.card-text:nth-child(3)').textContent;
+                const marca = marcaText.replace('Marca: ', '');
+                const precoText = btnComprar.parentNode.querySelector('.card-text:nth-child(4)').textContent;
+                const preco = parseFloat(precoText.replace('Preço: ', ''));
+                const fornecedorText = btnComprar.parentNode.querySelector('.card-text:nth-child(6)').textContent;
+                const fornecedor = fornecedorText.replace('Fornecedor: ', '');
+                const quantidade = parseInt(input.value);
+                const url_imagem = btnComprar.getAttribute('data-url-imagem');
+
+                if (quantidade >= 1) {
+                    comprarProduto(produtoId, nome, marca, preco, quantidade, fornecedor, url_imagem);
+                } else {
+                    alert('Por favor, escolha a quantidade desejada.');
+                }
+            });
+        }
+    });
+
+    function comprarProduto(produto_id, nome, marca, preco, quantidade, fornecedor, url_imagem) {
+        if (quantidade >= 1) {
+            document.getElementById('produtoIdInput').value = produto_id;
+            document.getElementById('produtoNome').textContent = nome;
+            document.getElementById('produtoMarca').textContent = marca;
+            document.getElementById('produtoPreco').textContent = '€ ' + preco;
+            document.getElementById('quantidadeInput').textContent = quantidade;
+            document.getElementById('produtoFornecedor').textContent = fornecedor;
+            document.getElementById('produtoUrlImagem').textContent = url_imagem;
+
+            $('#confirmacaoModal').modal('show');
+        }
+    }
+
+    function confirmarCompra() {
+        var produtoId = document.getElementById('produtoIdInput').value;
+        var nome = document.getElementById('produtoNome').textContent;
+        var marca = document.getElementById('produtoMarca').textContent;
+        var precoText = document.getElementById('produtoPreco').textContent;
+        var preco = parseFloat(precoText.replace('€ ', ''));
+        var quantidade = document.getElementById('quantidadeInput').textContent;
+        var fornecedor = document.getElementById('produtoFornecedor').textContent;
+        var data = new Date().toISOString().split('T')[0];  // Obter a data atual
+        var url_imagem = document.getElementById('produtoUrlImagem').textContent;
+
+        // Enviar uma solicitação POST para a rota '/profileadmin/comprar_produto'
+        $.ajax({
+            url: '/profileadmin/comprar_produto',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                produto_id: produtoId,
+                nome: nome,
+                marca: marca,
+                preco: preco,
+                quantidade: quantidade,
+                fornecedor: fornecedor,
+                data_compra: data,
+                url_imagem: url_imagem
+            }),
+            success: function (response) {
+                // Fechar o modal de confirmação
+                $('#confirmacaoModal').modal('hide');
+
+                // Exibir uma mensagem de sucesso
+                alert('Compra realizada com sucesso!');
+                window.location.reload();
+            },
+            error: function (error) {
+                // Exibir uma mensagem de erro
+                alert('Erro ao processar a compra. Por favor, tente novamente.');
+            }
+        });
+    }
+
+    // Adicionar um evento de clique aos botões de compra
+    const btnComprarList = document.querySelectorAll('.btn-comprar');
+    btnComprarList.forEach((btnComprar) => {
+        btnComprar.addEventListener('click', () => {
+            const produtoId = btnComprar.getAttribute('data-id');
+            const nome = btnComprar.parentNode.querySelector('.card-title').textContent;
+            const marcaText = btnComprar.parentNode.querySelector('.card-text:nth-child(3)').textContent;
+            const marca = marcaText.replace('Marca: ', '');
+            const precoText = btnComprar.parentNode.querySelector('.card-text:nth-child(4)').textContent;
+            const preco = parseFloat(precoText.replace('Preço: ', ''));
+            const quantidadeInput = btnComprar.parentNode.querySelector('input[name="quantidade"]');
+            const quantidade = parseInt(quantidadeInput.value);
+            const fornecedorText = btnComprar.parentNode.querySelector('.card-text:nth-child(6)').textContent;
+            const fornecedor = fornecedorText.replace('Fornecedor: ', '');
+
+            const cardImgTop = btnComprar.parentNode.querySelector('.card-img-top');
+            const urlImagem = btnComprar.getAttribute('data-url-imagem');
+            comprarProduto(produtoId, nome, marca, preco, quantidade, fornecedor, urlImagem);
+        });
+    });
+
+    function atualizarStockAdmin() {
+        // Obter os dados dos produtos em stock na página
+        const produtosContainer = document.querySelector('.stock-container');
+        const produtosCards = produtosContainer.querySelectorAll('.product-card');
+
+        // Criar uma matriz para armazenar os dados dos produtos em stock
+        const produtosStockAdmin = [];
+
+        // Iterar sobre cada card de produto
+        produtosCards.forEach((card) => {
+            const produtoId = card.querySelector('.btn-excluir').getAttribute('data-productId');
+            const nome = card.querySelector('.card-title').textContent;
+            const marcaText = card.querySelector('.card-text:nth-child(3)').textContent;
+            const marca = marcaText.replace('Marca: ', '');
+            const precoText = card.querySelector('.card-text:nth-child(4)').textContent;
+            const preco = parseFloat(precoText.replace('Preço: ', ''));
+            const quantidadeText = card.querySelector('.card-text:nth-child(5)').textContent;
+            const quantidade = parseInt(quantidadeText.replace('Quantidade: ', ''));
+            const fornecedorText = btnComprar.parentNode.querySelector('.card-text:nth-child(6)').textContent;
+            const fornecedor = fornecedorText.replace('Fornecedor: ', '');
+            const dataCompra = card.querySelector('.card-text:nth-child(7)').textContent;
+            const urlImagem = card.querySelector('.card-img-top').getAttribute('src');
+
+            // Criar um objeto com os dados do produto
+            const produtoStockAdmin = {
+                produtoId: produtoId,
+                nome: nome,
+                marca: marca,
+                preco: preco,
+                quantidade: quantidade,
+                fornecedor: fornecedor,
+                dataCompra: dataCompra,
+                urlImagem: urlImagem
+            };
+
+            // Adicionar o objeto à matriz de produtos em stock
+            produtosStockAdmin.push(produtoStockAdmin);
+        });
+
+        // Enviar uma solicitação ao servidor para atualizar o stock do administrador
+        $.ajax({
+            url: '/profileadmin/atualizar_stock_admin',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({produtosStockAdmin: produtosStockAdmin}),
+            success: function (response) {
+                // Exibir uma mensagem de sucesso
+                alert('stock do administrador atualizado com sucesso!');
+            },
+            error: function (error) {
+                // Exibir uma mensagem de erro
+                alert('Erro ao atualizar o stock do administrador. Por favor, tente novamente.');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        // Atualizar o número de notificações
+        atualizarNumeroNotificacoes();
+
+        // Evento de clique no ícone de notificação
+        $('#icone-notificacao').on('click', function () {
+            exibirNotificacoes();
+        });
+    });
+
+    function atualizarNumeroNotificacoes() {
+        $.ajax({
+            url: '/profileadmin/notificacoes',
+            type: 'GET',
+            success: function (response) {
+                var numeroNotificacoes = response.notificacoes.length;
+                $('#numero-notificacoes').text(numeroNotificacoes);
+            },
+            error: function () {
+                console.error('Erro ao obter o número de notificações');
+            }
+        });
+    }
+
+    function exibirNotificacoes() {
+        $.ajax({
+            url: '/profileadmin/notificacoes',
+            type: 'GET',
+            success: function (response) {
+                var notificacoes = response.notificacoes;
+                var dropdown = $('#notificacoes-dropdown');
+                dropdown.empty();
+
+                if (notificacoes.length === 0) {
+                    dropdown.append('<p>Sem notificações</p>');
+                } else {
+                    for (var i = 0; i < notificacoes.length; i++) {
+                        var notificacao = notificacoes[i];
+                        var produto = notificacao.produto;
+                        var quantidade = notificacao.quantidade;
+                        var percentual = notificacao.percentual;
+
+                        var mensagem = '<p><strong>Produto:</strong> ' + produto + '</p>';
+                        mensagem += '<p><strong>Quantidade em stock:</strong> ' + quantidade + '</p>';
+                        mensagem += '<p><strong>Percentual do stock inicial:</strong> ' + percentual.toFixed(2) + '%</p>';
+                        mensagem += '<p>----------------------------------------------</p>';
+
+                        dropdown.append(mensagem);
+                    }
+                }
+
+                dropdown.slideToggle();
+
+                // Atualizar número no sino
+                var numeroNotificacoes = notificacoes.length;
+                $('.numero-notificacoes').text(numeroNotificacoes);
+
+            },
+            error: function () {
+                console.error('Erro ao obter as notificações');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        exibirNotificacoes(); // Chamada da função que exibe as notificações
+    });
+</script>
+</body>
+</html>
