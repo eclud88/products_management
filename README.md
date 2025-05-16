@@ -22,19 +22,29 @@ O sistema permite a administração de produtos, bem como interações específi
 
 ## ⚙️ Tecnologias utilizadas
 
-- Python 3.x
+- Python 3.13
 - Flask
 - SQLite para base de dados
 
 ## 📁 Estrutura do Projeto
 
 ```bash
-meu-projeto/
+products_management/
 │
-├── main.py               # Arquivo principal para execução
-├── admin.py              # Lógica do admin
-├── fornecedor.py         # Lógica dos fornecedores
-├── cliente.py            # Lógica dos clientes
-├── produtos.py           # Gestão de produtos
-├── database.py           # Simulação ou ligação à base de dados
-└── README.md             # Este arquivo
+├── app.py                           # Arquivo principal para execução
+├── comprasadmin.db                  # Base de dados das compras do admin
+├── comprascliente.db                # Base de dados das compras do cliente
+├── estatisticas_admin.html          # Arquivo das estatísticas do admin
+├── estatisticas_cliente.html        # Arquivo das estatísticas do cliente
+├── estatisticas_fornecedor.html     # Arquivo principal para execução
+├── profileadmin.py                  # Lógica do admin
+├── profilefornecedor.py             # Lógica dos fornecedores
+├── profilecliente.py                # Lógica dos clientes
+├── login.html                       # Página de login
+├── logindata.db                     # Base de dados do login
+├── profilecliente.py                # Lógica dos clientes
+├── gestaodeprodutos.db              # Gestão de produtos
+├── stockadmin.db                    # Base de dados do stock do admin
+├── style.css                        # Arquivo de estilos do projeto
+├── sobre_nos_fornecedores.html      # Página sobre os fornecedores
+└── README.md                        # Este arquivo
